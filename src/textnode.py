@@ -26,7 +26,6 @@ class TextNode():
     
     def __repr__(self):
         return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
-    
 
 def text_node_to_html_node(text_node):
     match text_node.text_type:
@@ -46,3 +45,26 @@ def text_node_to_html_node(text_node):
             return LeafNode("img", "", props)
         case _:
             raise Exception("unknown text type")
+
+def split_nodes_delimiter(old_nodes, delimiter, text_type):
+    result = []
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            result.append(node)
+            continue
+            
+        if node.text.count(delimiter) % 2 != 0:
+            raise Exception('Number of delimiters is not equal, the syntax is invalid.')
+
+        text_split = node.text.split(delimiter)
+
+        for i, line in enumerate(text_split):
+            if line == "":
+                continue
+            if i % 2 != 0:
+                x = TextNode(line, text_type)
+                result.append(x)
+            else:
+                x = TextNode(line, TextType.TEXT)
+                result.append(x)
+    return result
