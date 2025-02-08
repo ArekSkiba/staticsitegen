@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimiter
+from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links
 
 
 class TestTextNode(unittest.TestCase):
@@ -137,7 +137,6 @@ class TestInlineMarkdown(unittest.TestCase):
     def test_delim_bold_and_italic(self):
         node = TextNode("**bold** and *italic*", TextType.TEXT)
         new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
-        print("After first split:", new_nodes)
         new_nodes = split_nodes_delimiter(new_nodes, "*", TextType.ITALIC)
         self.assertListEqual(
             [
@@ -159,6 +158,26 @@ class TestInlineMarkdown(unittest.TestCase):
             ],
             new_nodes,
         )
+
+    def test_extract_markdown_images(self):
+        text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+        text_match = extract_markdown_images(text)
+        self.assertEqual(text_match, [("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")])
+
+    def test_extract_markdown_images_two(self):
+        text = "This is text with a [rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+        text_match = extract_markdown_images(text)
+        self.assertEqual(text_match, [("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")])        
+
+    def test_extract_markdown_links(self):
+        text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        text_match = extract_markdown_links(text)
+        self.assertEqual(text_match, [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")])
+
+    def test_extract_markdown_links(self):
+        text = "This is text with a link [to boot dev](https://www.boot.dev) and ![to youtube](https://www.youtube.com/@bootdotdev)"
+        text_match = extract_markdown_links(text)
+        self.assertEqual(text_match, [("to boot dev", "https://www.boot.dev")])        
 
 
 if __name__ == "__main__":
