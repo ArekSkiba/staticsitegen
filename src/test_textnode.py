@@ -78,6 +78,5 @@ class TestTextNode(unittest.TestCase):
             text_node_to_html_node(node7)
         self.assertTrue("unknown text type" in str(context.exception).lower())
 
-
 if __name__ == "__main__":
     unittest.main()
