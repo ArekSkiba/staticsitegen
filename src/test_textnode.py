@@ -23,7 +23,7 @@ class TestTextNode(unittest.TestCase):
         # Test TEXT type
         node = TextNode("Hello, world!", TextType.TEXT)
         html_node = text_node_to_html_node(node)
-        self.assertEqual(html_node.tag, "", "Text node should have empty tag")
+        self.assertEqual(html_node.tag, None)
         self.assertEqual(html_node.value, "Hello, world!", "Text node value should match input text")
         self.assertIsNone(html_node.props, "Text node should have None props")
 
