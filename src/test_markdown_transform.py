@@ -1,6 +1,6 @@
 import unittest
 
-from markdown_transform import markdown_to_blocks, block_to_block_type, markdown_to_html_node
+from markdown_transform import markdown_to_blocks, block_to_block_type, markdown_to_html_node, extract_title
 
 
 class TestMarkdownToBlock(unittest.TestCase):
@@ -59,6 +59,11 @@ This is the same paragraph on a new line
 
     def test_block_to_block_quote(self):
         markdown_block = "> first line\n> second line"
+        result = block_to_block_type(markdown_block)
+        self.assertEqual(result, "quote")
+
+    def test_block_to_block_quote_oneline(self):
+        markdown_block = "> All that is gold does not glitter"
         result = block_to_block_type(markdown_block)
         self.assertEqual(result, "quote")
 
@@ -204,6 +209,54 @@ this is paragraph text
             node.to_html(),
             "<div><pre><code></code></pre></div>"
         )
+
+    def test_extract_title_one(self):
+        md = """
+# This is an h1
+
+this is paragraph text
+
+## this is an h2
+"""
+
+        title = extract_title(md)
+        self.assertEqual(
+            title,
+            "This is an h1",
+        )
+
+    def test_extract_title_two(self):
+        md = "# Title with spaces at end   "
+
+        title = extract_title(md)
+        self.assertEqual(
+            title,
+            "Title with spaces at end",
+        )
+
+    def test_extract_title_three(self):
+        md = """
+Some text
+# The Title
+More text"""
+
+        title = extract_title(md)
+        self.assertEqual(
+            title,
+            "The Title",
+        )
+
+    def test_extract_title_four(self):
+        md = """# First Title
+# Second Title"""
+
+        title = extract_title(md)
+        self.assertEqual(
+            title,
+            "First Title",
+        )
+        
+
 
 if __name__ == "__main__":
     unittest.main()

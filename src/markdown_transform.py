@@ -1,6 +1,6 @@
 from inline_markdown import text_to_textnodes
 from textnode import text_node_to_html_node
-from htmlnode import ParentNode, LeafNode, HTMLNode
+from htmlnode import ParentNode, LeafNode
 
 def markdown_to_blocks(markdown):
     str_list = markdown.split("\n\n")
@@ -12,12 +12,14 @@ def markdown_to_blocks(markdown):
 
 def block_to_block_type(block):
     block_type = []
-
+    
     if (len(block.split("\n")) == 1):
         if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
             block_type.append("heading")
         elif block[:3] == "```" and block[-3:] == "```":
             block_type.append("code")
+        elif block[:2] == "> ":
+            block_type.append("quote")
     else:    
         line = block.split("\n")
         n = 0
@@ -89,21 +91,19 @@ def paragraph_cleaning(paragraph):
 def code_cleaning(code):
     clean = code[3:-3]
     lines = clean.split("\n")
-    # Remove empty lines at start and end
+    
     while lines and not lines[0].strip():
         lines.pop(0)
     while lines and not lines[-1].strip():
         lines.pop()
     
-    # Find minimum indentation
     min_indent = None
     for line in lines:
-        if line.strip():  # Skip empty lines
+        if line.strip():
             current_indent = len(line) - len(line.lstrip())
             if min_indent is None or current_indent < min_indent:
                 min_indent = current_indent
     
-    # Remove common indentation from all lines
     if min_indent:
         lines = [line[min_indent:] if line.strip() else line for line in lines]
     
@@ -121,8 +121,19 @@ def list_process(list, bullet):
     node_list = []
     for line in split_list:
         if bullet == "* ":
-            clean_line = line.strip(bullet)
+            clean_line = line[len(bullet):]
         else: 
             clean_line = line.split(bullet, 1)[1].strip()
         node_list.append(ParentNode("li", text_to_children(clean_line)))
     return node_list
+
+def extract_title(markdown):
+    lines = markdown.split("\n")
+    result = ""
+    for line in lines:
+        if line.startswith("# "):
+            result = line.lstrip("# ").strip()
+            return result
+    if not result:
+        raise Exception("no h1 line in markdown text")
+    
