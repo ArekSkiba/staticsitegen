@@ -136,4 +136,3 @@ def extract_title(markdown):
             return result
     if not result:
         raise Exception("no h1 line in markdown text")
-    
